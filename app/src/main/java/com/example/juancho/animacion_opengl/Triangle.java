@@ -19,11 +19,21 @@ public class Triangle {
     // Use to access and set the view transformation
     private int mMVPMatrixHandle;
 
-    private final String vertexShaderCode =
+  /*  private final String vertexShaderCode =
             "attribute vec4 vPosition;" +
                     "void main() {" +
                     "  gl_Position = vPosition;" +
+                    "}";*/
+    private final String vertexShaderCode =
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec4 vPosition;" +
+                    "void main() {" +
+                    "  gl_Position = uMVPMatrix * vPosition;" +
                     "}";
+
+
+
+
     private final String fragmentShaderCode =
             "precision mediump float;" +
                     "uniform vec4 vColor;" +
@@ -75,7 +85,7 @@ public class Triangle {
     }
 
 
-    public void draw() {
+    public void draw(float[] mvpMatrix) {
 
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
@@ -102,6 +112,20 @@ public class Triangle {
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(mPositionHandle);
+
+        //---------Reajuste proyección CAMARA
+        // get handle to shape's transformation matrix
+        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+
+        // Pass the projection and view transformation to the shader
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
+        // Draw the triangle
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+
+        // Disable vertex array
+        GLES20.glDisableVertexAttribArray(mPositionHandle);
+
 
     }
 
